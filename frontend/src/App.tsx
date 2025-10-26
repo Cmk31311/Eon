@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import EarthGlobe from './components/EarthGlobe';
+import { NarrativePanel } from './components/NarrativePanel';
 import { environmentalDataService, EnvironmentalData } from './services/environmentalDataService';
 import { narrativeService, NarrativeResponse } from './services/narrativeService';
 
@@ -187,22 +188,37 @@ function App() {
 
             {isDropdownOpen && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg shadow-2xl z-50 max-h-80 overflow-y-auto">
-                {regions.map((regionData) => (
-                  <button
-                    key={regionData.name}
-                    onClick={() => {
-                      setRegion(regionData.name);
-                      setIsDropdownOpen(false);
-                    }}
-                    className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-all duration-300 border-b border-white/5 last:border-b-0 ${
-                      region === regionData.name
-                        ? 'bg-purple-500/20 text-purple-300'
-                        : 'text-white'
-                    }`}
-                  >
-                    <div className="font-medium">{regionData.label}</div>
-                    <div className="text-sm text-gray-400">{regionData.category}</div>
-                  </button>
+                {Object.entries(
+                  regions.reduce((acc, regionData) => {
+                    if (!acc[regionData.category]) {
+                      acc[regionData.category] = [];
+                    }
+                    acc[regionData.category].push(regionData);
+                    return acc;
+                  }, {} as Record<string, typeof regions>)
+                ).map(([category, categoryRegions]) => (
+                  <div key={category}>
+                    <div className="px-6 py-2 text-xs font-semibold text-gray-300 uppercase tracking-wider bg-white/5 border-b border-white/10">
+                      {category}
+                    </div>
+                    {categoryRegions.map((regionData) => (
+                      <button
+                        key={regionData.name}
+                        onClick={() => {
+                          setRegion(regionData.name);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-all duration-300 border-b border-white/5 last:border-b-0 ${
+                          region === regionData.name
+                            ? 'bg-purple-500/20 text-purple-300'
+                            : 'text-white'
+                        }`}
+                      >
+                        <div className="font-medium">{regionData.label}</div>
+                        <div className="text-sm text-gray-400">{regionData.category}</div>
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}
@@ -275,7 +291,7 @@ function App() {
                   🤖 AI Environmental Narrative
                 </span>
               </h2>
-              <p className="text-gray-300 leading-relaxed text-lg">{narrative.narrative}</p>
+              <NarrativePanel narrative={narrative.narrative} />
                 </div>
                   </div>
               )}
