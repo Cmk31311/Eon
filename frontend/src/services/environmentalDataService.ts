@@ -52,7 +52,6 @@ class EnvironmentalDataService {
     console.log(`🌍 Fetching environmental data for ${locationName || 'location'} at ${lat}, ${lon}`);
     
     try {
-      // Try to fetch real data from Open Meteo
       const realData = await this.fetchOpenMeteoData(lat, lon);
       if (realData && realData.current) {
         console.log('✅ Successfully fetched real data from Open Meteo');
@@ -62,7 +61,6 @@ class EnvironmentalDataService {
       console.warn('⚠️ Open Meteo API failed, using location-specific mock data:', error);
     }
 
-    // Fallback to location-specific mock data
     console.log('🔄 Using location-specific mock data');
     return this.getLocationSpecificMockData(lat, lon, locationName);
   }
@@ -90,7 +88,7 @@ class EnvironmentalDataService {
     
     const response = await axios.get(this.openMeteoBaseUrl, { 
       params,
-      timeout: 8000 // 8 second timeout
+      timeout: 8000
     });
     
     console.log('📊 Open Meteo API response:', response.data);
@@ -128,11 +126,9 @@ class EnvironmentalDataService {
   private getLocationSpecificMockData(lat: number, lon: number, locationName?: string): EnvironmentalData {
     console.log(`🎭 Generating location-specific mock data for ${locationName} at ${lat}, ${lon}`);
     
-    // Create location-specific data based on coordinates and location type
     const baseData = this.calculateLocationBasedData(lat, lon, locationName);
     
-    // Add some realistic variation
-    const variation = 0.1; // 10% variation
+    const variation = 0.1;
     
     return {
       temperature: this.addVariation(baseData.temperature, variation),
@@ -153,14 +149,11 @@ class EnvironmentalDataService {
   }
 
   private calculateLocationBasedData(lat: number, lon: number, locationName?: string) {
-    // Base calculations using latitude and longitude
     const latitude = lat;
     const longitude = lon;
     
-    // Temperature based on latitude (colder at poles, warmer at equator)
     const baseTemp = 30 - Math.abs(latitude) * 0.5;
     
-    // Humidity based on location type and latitude
     let baseHumidity = 60;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -183,10 +176,8 @@ class EnvironmentalDataService {
       }
     }
     
-    // Pressure varies with altitude and latitude
     const basePressure = 1013.25 - Math.abs(latitude) * 0.1;
     
-    // Wind speed based on location
     let baseWindSpeed = 3.0;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -205,10 +196,8 @@ class EnvironmentalDataService {
       }
     }
     
-    // UV Index based on latitude (higher near equator)
     const baseUV = Math.max(1, 8 - Math.abs(latitude) * 0.1);
     
-    // Visibility based on location
     let baseVisibility = 10;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -227,7 +216,6 @@ class EnvironmentalDataService {
       }
     }
     
-    // Cloud cover based on location
     let baseCloudCover = 40;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -248,10 +236,8 @@ class EnvironmentalDataService {
       }
     }
     
-    // Solar radiation based on latitude and cloud cover
     const baseSolarRadiation = Math.max(100, 800 - Math.abs(latitude) * 5 - baseCloudCover * 3);
     
-    // Air quality based on location type
     let baseAQI = 50;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -274,7 +260,6 @@ class EnvironmentalDataService {
       }
     }
     
-    // CO2 concentration based on location
     let baseCO2 = 410;
     if (locationName) {
       const name = locationName.toLowerCase();
@@ -300,7 +285,7 @@ class EnvironmentalDataService {
       humidity: baseHumidity,
       pressure: basePressure,
       wind_speed: baseWindSpeed,
-      precipitation: Math.random() * 2, // Random precipitation
+      precipitation: Math.random() * 2,
       uv_index: baseUV,
       visibility: baseVisibility,
       cloud_cover: baseCloudCover,
@@ -317,23 +302,20 @@ class EnvironmentalDataService {
   }
 
   private calculateSolarRadiation(latitude: number, cloudCover: number): number {
-    // Solar radiation decreases with latitude and cloud cover
     const baseRadiation = 800 - Math.abs(latitude) * 5;
     const cloudReduction = cloudCover * 3;
     return Math.max(100, baseRadiation - cloudReduction);
   }
 
   private calculateAirQualityIndex(pressure: number, humidity: number, latitude: number): number {
-    // AQI calculation based on atmospheric conditions
     const baseAQI = 50;
     const pressureFactor = Math.max(0, (1013.25 - pressure) / 10);
     const humidityFactor = Math.max(0, (humidity - 60) / 10);
-    const latitudeFactor = Math.abs(latitude) * 0.1; // Higher AQI at poles
+    const latitudeFactor = Math.abs(latitude) * 0.1;
     return Math.round(baseAQI + pressureFactor + humidityFactor + latitudeFactor);
   }
 
   private estimateCO2Concentration(temperature: number, latitude: number): number {
-    // CO2 estimation based on temperature and location
     const baseCO2 = 410;
     const tempFactor = (temperature - 15) * 2;
     const latitudeFactor = Math.abs(latitude) * 0.1;

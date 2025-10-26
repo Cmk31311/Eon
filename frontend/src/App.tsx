@@ -4,50 +4,42 @@ import EarthGlobe from './components/EarthGlobe';
 import { environmentalDataService, EnvironmentalData } from './services/environmentalDataService';
 import { narrativeService, NarrativeResponse } from './services/narrativeService';
 
-// Comprehensive global region data with coordinates
 const regions = [
-  // Rainforests
   { name: 'amazon_rainforest', lat: -3.4653, lon: -62.2159, label: 'Amazon Rainforest', category: 'Rainforest' },
   { name: 'congo_rainforest', lat: -0.2280, lon: 15.8277, label: 'Congo Rainforest', category: 'Rainforest' },
   { name: 'borneo_rainforest', lat: 1.3521, lon: 103.8198, label: 'Borneo Rainforest', category: 'Rainforest' },
   { name: 'daintree_rainforest', lat: -16.1667, lon: 145.4167, label: 'Daintree Rainforest', category: 'Rainforest' },
   { name: 'atlantic_forest', lat: -23.5505, lon: -46.6333, label: 'Atlantic Forest', category: 'Rainforest' },
 
-  // Deserts
   { name: 'sahara_desert', lat: 23.8061, lon: 11.2884, label: 'Sahara Desert', category: 'Desert' },
   { name: 'gobi_desert', lat: 42.5900, lon: 103.4300, label: 'Gobi Desert', category: 'Desert' },
   { name: 'atacama_desert', lat: -24.5000, lon: -69.2500, label: 'Atacama Desert', category: 'Desert' },
   { name: 'namib_desert', lat: -24.5000, lon: 15.0000, label: 'Namib Desert', category: 'Desert' },
   { name: 'mohave_desert', lat: 35.0000, lon: -115.5000, label: 'Mojave Desert', category: 'Desert' },
 
-  // Mountains
   { name: 'himalayas', lat: 28.0000, lon: 84.0000, label: 'Himalayas', category: 'Mountain' },
   { name: 'alps', lat: 46.5197, lon: 6.6323, label: 'Alps', category: 'Mountain' },
   { name: 'rocky_mountains', lat: 39.7392, lon: -104.9903, label: 'Rocky Mountains', category: 'Mountain' },
   { name: 'andes', lat: -32.6532, lon: -70.0112, label: 'Andes', category: 'Mountain' },
   { name: 'urals', lat: 60.0000, lon: 60.0000, label: 'Ural Mountains', category: 'Mountain' },
 
-  // Coastal
   { name: 'great_barrier_reef', lat: -18.2871, lon: 147.6992, label: 'Great Barrier Reef', category: 'Coastal' },
   { name: 'maldives', lat: 3.2028, lon: 73.2207, label: 'Maldives', category: 'Coastal' },
   { name: 'hawaii', lat: 19.8968, lon: -155.5828, label: 'Hawaii', category: 'Coastal' },
   { name: 'galapagos', lat: -0.7893, lon: -91.0544, label: 'Galapagos Islands', category: 'Coastal' },
   { name: 'mediterranean', lat: 35.0000, lon: 18.0000, label: 'Mediterranean Sea', category: 'Coastal' },
 
-  // Arctic/Antarctic
   { name: 'antarctica', lat: -75.0000, lon: 0.0000, label: 'Antarctica', category: 'Polar' },
   { name: 'alaska', lat: 64.2008, lon: -149.4937, label: 'Alaska', category: 'Polar' },
   { name: 'siberia', lat: 60.0000, lon: 100.0000, label: 'Siberia', category: 'Polar' },
   { name: 'greenland', lat: 71.7069, lon: -42.6043, label: 'Greenland', category: 'Polar' },
   { name: 'northern_canada', lat: 60.0000, lon: -100.0000, label: 'Northern Canada', category: 'Polar' },
 
-  // Islands
   { name: 'iceland', lat: 64.9631, lon: -19.0208, label: 'Iceland', category: 'Island' },
   { name: 'madagascar', lat: -18.7669, lon: 46.8691, label: 'Madagascar', category: 'Island' },
   { name: 'philippines', lat: 12.8797, lon: 121.7740, label: 'Philippines', category: 'Island' },
   { name: 'sri_lanka', lat: 7.8731, lon: 80.7718, label: 'Sri Lanka', category: 'Island' },
 
-  // Plains
   { name: 'serengeti', lat: -2.1530, lon: 34.6857, label: 'Serengeti', category: 'Plains' },
   { name: 'pampas', lat: -34.6037, lon: -58.3816, label: 'Pampas', category: 'Plains' },
   { name: 'prairies', lat: 49.0000, lon: -100.0000, label: 'Great Plains', category: 'Plains' },
@@ -65,10 +57,8 @@ function App() {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get current region data
   const currentRegion = regions.find(r => r.name === region);
 
-  // Load region data
   const loadRegionData = useCallback(async (regionName: string) => {
     setIsLoading(true);
     try {
@@ -77,7 +67,6 @@ function App() {
 
       console.log(`🌍 Loading data for ${regionData.label}...`);
       
-      // Get environmental data
       const environmentalData = await environmentalDataService.getLiveEnvironmentalData(
         regionData.lat, 
         regionData.lon, 
@@ -87,7 +76,6 @@ function App() {
       setFeatures(environmentalData);
       setLastUpdate(new Date());
 
-      // Get narrative
         try {
         const narrativeResponse = await narrativeService.generateNarrative(environmentalData, regionData.label);
         setNarrative(narrativeResponse);
@@ -103,14 +91,12 @@ function App() {
     }
   }, []);
 
-  // Load data when region changes
   useEffect(() => {
     if (region) {
       loadRegionData(region);
     }
   }, [region, loadRegionData]);
 
-  // Auto-refresh
   useEffect(() => {
     if (!autoRefresh) return;
 
@@ -118,12 +104,11 @@ function App() {
       if (region) {
         loadRegionData(region);
       }
-    }, 30000); // Refresh every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [autoRefresh, region, loadRegionData]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {

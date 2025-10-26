@@ -26,7 +26,6 @@ class NarrativeService {
     const wind = data.wind_speed;
     const cloud = data.cloud_cover;
 
-    // Determine mood based on environmental conditions
     if (aqi > 70) return 'concerned';
     if (temp < -10) return 'harsh';
     if (temp > 35) return 'intense';
@@ -43,7 +42,6 @@ class NarrativeService {
   private generateInsights(data: EnvironmentalData): string[] {
     const insights: string[] = [];
     
-    // Temperature insights
     if (data.temperature < -20) {
       insights.push('Extreme cold conditions create unique survival challenges');
     } else if (data.temperature > 40) {
@@ -52,35 +50,30 @@ class NarrativeService {
       insights.push('Optimal temperature range supports diverse ecosystems');
     }
 
-    // Humidity insights
     if (data.humidity > 80) {
       insights.push('High humidity creates lush, tropical environments');
     } else if (data.humidity < 30) {
       insights.push('Low humidity creates arid conditions requiring water conservation');
     }
 
-    // Air quality insights
     if (data.air_quality_index < 30) {
       insights.push('Exceptional air quality indicates pristine environmental conditions');
     } else if (data.air_quality_index > 70) {
       insights.push('Elevated air pollution levels require attention and mitigation');
     }
 
-    // Wind insights
     if (data.wind_speed > 6) {
       insights.push('Strong winds create dynamic atmospheric conditions');
     } else if (data.wind_speed < 2) {
       insights.push('Calm conditions allow for stable atmospheric patterns');
     }
 
-    // Solar radiation insights
     if (data.solar_radiation > 600) {
       insights.push('High solar radiation provides abundant energy for photosynthesis');
     } else if (data.solar_radiation < 200) {
       insights.push('Limited solar radiation creates challenging conditions for plant life');
     }
 
-    // CO2 insights
     if (data.co2_concentration < 400) {
       insights.push('Lower CO2 levels indicate natural carbon sequestration');
     } else if (data.co2_concentration > 450) {
@@ -101,21 +94,16 @@ class NarrativeService {
     const uv = data.uv_index;
     const visibility = data.visibility;
 
-    // Create a structured, concise narrative
     const locationDescriptor = this.getLocationDescriptor(locationName);
     
-    // Opening statement
     let narrative = `Welcome to ${locationName}, where ${locationDescriptor}. `;
 
-    // Primary environmental condition (most significant)
     const primaryCondition = this.getPrimaryCondition(data, locationName);
     narrative += primaryCondition;
 
-    // Secondary conditions (2-3 most relevant)
     const secondaryConditions = this.getSecondaryConditions(data, locationName);
     narrative += secondaryConditions;
 
-    // Impact statement
     const impactStatement = this.getImpactStatement(data, locationName, mood);
     narrative += impactStatement;
 
@@ -128,7 +116,6 @@ class NarrativeService {
     const humidity = data.humidity;
     const wind = data.wind_speed;
 
-    // Determine the most significant condition
     if (aqi > 70) {
       return `The air quality index of ${aqi.toFixed(0)} indicates concerning atmospheric conditions that require attention. `;
     } else if (temp < -20) {
@@ -155,7 +142,6 @@ class NarrativeService {
     const cloud = data.cloud_cover;
     const visibility = data.visibility;
 
-    // Add 2-3 most relevant secondary conditions
     if (humidity > 60 && humidity <= 80) {
       conditions.push(`humidity at ${humidity.toFixed(1)}%`);
     } else if (humidity < 30) {
@@ -186,7 +172,6 @@ class NarrativeService {
       conditions.push(`limited visibility of ${visibility.toFixed(1)} km`);
     }
 
-    // Return top 2-3 conditions
     const selectedConditions = conditions.slice(0, 2);
     if (selectedConditions.length > 0) {
       return `Additional conditions include ${selectedConditions.join(' and ')}. `;
@@ -245,8 +230,6 @@ class NarrativeService {
     console.log(`📝 Generating AI narrative for ${locationName} with environmental data:`, data);
     
     try {
-      // For now, we'll use the local narrative generation
-      // In the future, this could call an external AI service
       const narrative = this.generateNarrativeFromData(data, locationName);
       
       console.log(`✅ Generated narrative with mood: ${narrative.mood}`);
@@ -254,7 +237,6 @@ class NarrativeService {
     } catch (error) {
       console.error('Error generating narrative:', error);
       
-      // Fallback narrative
       return {
         narrative: `Welcome to ${locationName}. This region offers unique environmental characteristics with a temperature of ${data.temperature.toFixed(1)}°C, humidity of ${data.humidity.toFixed(1)}%, and air quality index of ${data.air_quality_index.toFixed(0)}. The environment here tells a story of natural diversity and climatic adaptation.`,
         mood: 'neutral',

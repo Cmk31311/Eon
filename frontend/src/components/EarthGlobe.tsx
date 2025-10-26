@@ -35,10 +35,9 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
     if (globeEl.current && Globe && selectedRegion) {
       const selectedRegionData = regions.find(r => r.name === selectedRegion);
       if (selectedRegionData) {
-        // Smooth transition to selected region
         globeEl.current.pointOfView(
           { lat: selectedRegionData.lat, lng: selectedRegionData.lon, altitude: 2 },
-          1000 // 1 second transition
+          1000
         );
       }
     }
@@ -46,7 +45,6 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
 
   useEffect(() => {
     if (globeEl.current && Globe) {
-      // Optimized controls for smooth performance
       globeEl.current.controls().autoRotate = true;
       globeEl.current.controls().autoRotateSpeed = 0.5;
       globeEl.current.controls().enableDamping = true;
@@ -123,7 +121,6 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
         enablePointerInteraction={true}
         animateIn={false}
         
-        // Show ONLY the selected region with enhanced styling
         pointsData={selectedRegionData ? [selectedRegionData] : []}
         pointLat={(d: Region) => d.lat}
         pointLng={(d: Region) => d.lon}
@@ -131,7 +128,6 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
         pointRadius={0.6}
         pointAltitude={0.02}
         
-        // Show ONLY the selected region label with enhanced styling
         labelsData={selectedRegionData ? [selectedRegionData] : []}
         labelLat={(d: Region) => d.lat}
         labelLng={(d: Region) => d.lon}
@@ -141,7 +137,6 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
         labelDotRadius={0.5}
         labelFont='"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif'
         
-        // Smooth click interactions
         onPointClick={handlePointClick}
         onLabelClick={handleLabelClick}
       />

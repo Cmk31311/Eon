@@ -4,17 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom font family for the entire application */
 * {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Monospace font for code elements */
 code, pre, .font-mono {
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
 }
 
-/* GAIA PULSE style font for EON - Exact match */
 .project-title {
   font-family: 'Inter', sans-serif !important;
   font-weight: 900 !important;
@@ -50,7 +47,6 @@ code, pre, .font-mono {
   }
 }
 
-/* Custom slider styles */
 .slider::-webkit-slider-thumb {
   appearance: none;
   height: 20px;
