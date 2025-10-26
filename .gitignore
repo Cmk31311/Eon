@@ -8,6 +8,14 @@ frontend/node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
+
+# API Keys and Secrets (Extra protection)
+*secret*
+*key*
+*password*
+*token*
+*credential*
 
 # Build outputs
 dist/

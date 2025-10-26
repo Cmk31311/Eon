@@ -54,5 +54,11 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+// Export for Vercel
+export default app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+}

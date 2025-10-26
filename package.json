@@ -1,13 +1,14 @@
 {
-  "name": "earthstory-frontend",
+  "name": "eon-earth-saga",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "server": "node server/index.js"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "server": "node server/index.js",
+    "vercel-build": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
     "axios": "^1.7.2",

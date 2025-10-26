@@ -62,11 +62,16 @@ export function NarrativePanel({ narrative }: NarrativePanelProps) {
   };
 
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-4">
       <div className="flex-1">
-        <p className="text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
-          {narrative}
-        </p>
+        <div className="relative">
+          <p className="text-gray-200 leading-relaxed text-lg whitespace-pre-wrap font-medium">
+            {narrative}
+          </p>
+          {/* Decorative quote marks - positioned to not interfere with button */}
+          <div className="absolute -top-2 -left-2 text-4xl text-purple-400/30 font-serif pointer-events-none">"</div>
+          <div className="absolute -bottom-4 -right-2 text-4xl text-purple-400/30 font-serif pointer-events-none">"</div>
+        </div>
       </div>
       <button
         type="button"
@@ -74,21 +79,28 @@ export function NarrativePanel({ narrative }: NarrativePanelProps) {
         onClick={handleSpeak}
         disabled={disabled}
         title={disabled ? 'No text available' : (speaking ? 'Stop speaking' : 'Speak narrative')}
-        className={`
-          inline-flex items-center gap-2 px-3 py-2 rounded-lg border
-          transition-all duration-200
-          ${disabled 
-            ? 'bg-gray-600 border-gray-500 text-gray-400 cursor-not-allowed' 
-            : 'bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 cursor-pointer'
-          }
-        `}
+        className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-300 text-sm font-medium group relative z-10 ${
+          disabled 
+            ? 'border-gray-500/30 bg-gray-500/10 text-gray-500 cursor-not-allowed' 
+            : speaking
+            ? 'border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50'
+            : 'border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 hover:scale-105'
+        }`}
       >
-        <span className="text-lg">
-          {speaking ? '⏹️' : '🔈'}
-        </span>
-        <span className="text-sm font-medium">
+        <div className="relative">
+          <span className="text-xl">
+            {speaking ? '⏹️' : '🔈'}
+          </span>
+          {!speaking && !disabled && (
+            <div className="absolute inset-0 text-xl animate-pulse opacity-50">🔈</div>
+          )}
+        </div>
+        <span className="font-semibold">
           {speaking ? 'Stop' : 'Speak'}
         </span>
+        {!disabled && (
+          <div className="w-2 h-2 bg-current rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
+        )}
       </button>
     </div>
   );

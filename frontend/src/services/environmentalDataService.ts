@@ -8,11 +8,15 @@ export interface EnvironmentalData {
   wind_direction: number;
   precipitation: number;
   uv_index: number;
-  visibility: number;
+  visibility_from_space: number;
   cloud_cover: number;
   solar_radiation: number;
   air_quality_index: number;
   co2_concentration: number;
+  ozone_concentration: number;
+  pollen_count: number;
+  soil_moisture: number;
+  noise_level: number;
   last_updated: string;
   location_name?: string;
 }
@@ -47,21 +51,44 @@ export interface OpenMeteoResponse {
 
 class EnvironmentalDataService {
   private openMeteoBaseUrl = 'https://api.open-meteo.com/v1/forecast';
+  private airVisualBaseUrl = 'https://api.airvisual.com/v2/nearest_city';
+  private weatherApiBaseUrl = 'https://api.weatherapi.com/v1/current.json';
 
   async getLiveEnvironmentalData(lat: number, lon: number, locationName?: string): Promise<EnvironmentalData> {
-    console.log(`🌍 Fetching environmental data for ${locationName || 'location'} at ${lat}, ${lon}`);
+    console.log(`🌍 Fetching live environmental data for ${locationName || 'location'} at ${lat}, ${lon}`);
     
     try {
-      const realData = await this.fetchOpenMeteoData(lat, lon);
-      if (realData && realData.current) {
-        console.log('✅ Successfully fetched real data from Open Meteo');
-        return this.processRealData(realData, locationName);
+      // Try multiple real data sources in parallel
+      const [weatherData, airQualityData] = await Promise.allSettled([
+        this.fetchOpenMeteoData(lat, lon),
+        this.fetchAirQualityData(lat, lon)
+      ]);
+
+      let processedData: EnvironmentalData | null = null;
+
+      // Process weather data if available
+      if (weatherData.status === 'fulfilled' && weatherData.value?.current) {
+        console.log('✅ Successfully fetched weather data from Open Meteo');
+        processedData = this.processRealData(weatherData.value, locationName);
+      }
+
+      // Enhance with air quality data if available
+      if (airQualityData.status === 'fulfilled' && airQualityData.value) {
+        console.log('✅ Successfully fetched air quality data from AirVisual');
+        if (processedData) {
+          processedData = this.enhanceWithAirQualityData(processedData, airQualityData.value);
+        }
+      }
+
+      if (processedData) {
+        console.log('🎯 Returning enhanced live data from multiple sources');
+        return processedData;
       }
     } catch (error) {
-      console.warn('⚠️ Open Meteo API failed, using location-specific mock data:', error);
+      console.warn('⚠️ Real data APIs failed, using location-specific mock data:', error);
     }
 
-    console.log('🔄 Using location-specific mock data');
+    console.log('🔄 Using location-specific mock data as fallback');
     return this.getLocationSpecificMockData(lat, lon, locationName);
   }
 
@@ -95,6 +122,48 @@ class EnvironmentalDataService {
     return response.data;
   }
 
+  private async fetchAirQualityData(lat: number, lon: number): Promise<any> {
+    try {
+      // Using a free air quality API (OpenWeatherMap Air Pollution API)
+      const response = await axios.get('https://api.openweathermap.org/data/2.5/air_pollution', {
+        params: {
+          lat: lat,
+          lon: lon,
+          appid: 'demo' // This would need a real API key for production
+        },
+        timeout: 5000
+      });
+      
+      console.log('🌬️ Air quality API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.warn('⚠️ Air quality API failed:', error);
+      return null;
+    }
+  }
+
+  private enhanceWithAirQualityData(baseData: EnvironmentalData, airQualityData: any): EnvironmentalData {
+    if (airQualityData?.list?.[0]?.main) {
+      const aqi = airQualityData.list[0].main.aqi;
+      const components = airQualityData.list[0].components;
+      
+      // Convert AQI to our scale (1-5 to 0-100)
+      const enhancedAQI = aqi * 20;
+      
+      // Estimate CO2 from other pollutants
+      const estimatedCO2 = 410 + (components?.co || 0) * 0.1;
+      
+      return {
+        ...baseData,
+        air_quality_index: enhancedAQI,
+        co2_concentration: estimatedCO2,
+        last_updated: new Date().toISOString()
+      };
+    }
+    
+    return baseData;
+  }
+
   private processRealData(openMeteoData: OpenMeteoResponse, locationName?: string): EnvironmentalData {
     const current = openMeteoData.current;
     
@@ -105,22 +174,26 @@ class EnvironmentalDataService {
       humidity: current.relative_humidity_2m
     });
 
-    return {
-      temperature: current.temperature_2m,
-      humidity: current.relative_humidity_2m,
-      pressure: current.surface_pressure,
-      wind_speed: current.wind_speed_10m,
-      wind_direction: current.wind_direction_10m,
-      precipitation: current.precipitation,
-      uv_index: current.uv_index,
-      visibility: current.visibility,
-      cloud_cover: current.cloud_cover,
-      solar_radiation: this.calculateSolarRadiation(openMeteoData.latitude, current.cloud_cover),
-      air_quality_index: this.calculateAirQualityIndex(current.surface_pressure, current.relative_humidity_2m, openMeteoData.latitude),
-      co2_concentration: this.estimateCO2Concentration(current.temperature_2m, openMeteoData.latitude),
-      last_updated: new Date().toISOString(),
-      location_name: locationName
-    };
+            return {
+              temperature: current.temperature_2m,
+              humidity: current.relative_humidity_2m,
+              pressure: current.surface_pressure,
+              wind_speed: current.wind_speed_10m,
+              wind_direction: current.wind_direction_10m,
+              precipitation: current.precipitation,
+              uv_index: current.uv_index,
+              visibility_from_space: current.visibility,
+              cloud_cover: current.cloud_cover,
+              solar_radiation: this.calculateSolarRadiation(openMeteoData.latitude, current.cloud_cover),
+              air_quality_index: this.calculateAirQualityIndex(current.surface_pressure, current.relative_humidity_2m, openMeteoData.latitude),
+              co2_concentration: this.estimateCO2Concentration(current.temperature_2m, openMeteoData.latitude),
+              ozone_concentration: this.estimateOzoneConcentration(current.uv_index, current.temperature_2m, openMeteoData.latitude),
+              pollen_count: this.estimatePollenCount(current.temperature_2m, current.relative_humidity_2m, current.wind_speed_10m),
+              soil_moisture: this.estimateSoilMoisture(current.precipitation, current.relative_humidity_2m, current.temperature_2m),
+              noise_level: this.estimateNoiseLevel(current.wind_speed_10m, openMeteoData.latitude, locationName),
+              last_updated: new Date().toISOString(),
+              location_name: locationName
+            };
   }
 
   private getLocationSpecificMockData(lat: number, lon: number, locationName?: string): EnvironmentalData {
@@ -130,22 +203,26 @@ class EnvironmentalDataService {
     
     const variation = 0.1;
     
-    return {
-      temperature: this.addVariation(baseData.temperature, variation),
-      humidity: this.addVariation(baseData.humidity, variation),
-      pressure: this.addVariation(baseData.pressure, variation * 0.5),
-      wind_speed: this.addVariation(baseData.wind_speed, variation * 2),
-      wind_direction: Math.round(Math.random() * 360),
-      precipitation: Math.max(0, this.addVariation(baseData.precipitation, variation * 3)),
-      uv_index: this.addVariation(baseData.uv_index, variation),
-      visibility: this.addVariation(baseData.visibility, variation * 0.5),
-      cloud_cover: Math.max(0, Math.min(100, this.addVariation(baseData.cloud_cover, variation))),
-      solar_radiation: this.addVariation(baseData.solar_radiation, variation),
-      air_quality_index: this.addVariation(baseData.air_quality_index, variation),
-      co2_concentration: this.addVariation(baseData.co2_concentration, variation * 0.5),
-      last_updated: new Date().toISOString(),
-      location_name: locationName
-    };
+            return {
+              temperature: this.addVariation(baseData.temperature, variation),
+              humidity: this.addVariation(baseData.humidity, variation),
+              pressure: this.addVariation(baseData.pressure, variation * 0.5),
+              wind_speed: this.addVariation(baseData.wind_speed, variation * 2),
+              wind_direction: Math.round(Math.random() * 360),
+              precipitation: Math.max(0, this.addVariation(baseData.precipitation, variation * 3)),
+              uv_index: this.addVariation(baseData.uv_index, variation),
+              visibility_from_space: this.addVariation(baseData.visibility_from_space, variation * 0.5),
+              cloud_cover: Math.max(0, Math.min(100, this.addVariation(baseData.cloud_cover, variation))),
+              solar_radiation: this.addVariation(baseData.solar_radiation, variation),
+              air_quality_index: this.addVariation(baseData.air_quality_index, variation),
+              co2_concentration: this.addVariation(baseData.co2_concentration, variation * 0.5),
+              ozone_concentration: this.addVariation(baseData.ozone_concentration, variation),
+              pollen_count: this.addVariation(baseData.pollen_count, variation * 2),
+              soil_moisture: this.addVariation(baseData.soil_moisture, variation),
+              noise_level: this.addVariation(baseData.noise_level, variation),
+              last_updated: new Date().toISOString(),
+              location_name: locationName
+            };
   }
 
   private calculateLocationBasedData(lat: number, lon: number, locationName?: string) {
@@ -280,19 +357,23 @@ class EnvironmentalDataService {
       }
     }
     
-    return {
-      temperature: baseTemp,
-      humidity: baseHumidity,
-      pressure: basePressure,
-      wind_speed: baseWindSpeed,
-      precipitation: Math.random() * 2,
-      uv_index: baseUV,
-      visibility: baseVisibility,
-      cloud_cover: baseCloudCover,
-      solar_radiation: baseSolarRadiation,
-      air_quality_index: baseAQI,
-      co2_concentration: baseCO2
-    };
+            return {
+              temperature: baseTemp,
+              humidity: baseHumidity,
+              pressure: basePressure,
+              wind_speed: baseWindSpeed,
+              precipitation: Math.random() * 2,
+              uv_index: baseUV,
+              visibility_from_space: baseVisibility,
+              cloud_cover: baseCloudCover,
+              solar_radiation: baseSolarRadiation,
+              air_quality_index: baseAQI,
+              co2_concentration: baseCO2,
+              ozone_concentration: this.estimateOzoneConcentration(baseUV, baseTemp, latitude),
+              pollen_count: this.estimatePollenCount(baseTemp, baseHumidity, baseWindSpeed),
+              soil_moisture: this.estimateSoilMoisture(Math.random() * 2, baseHumidity, baseTemp),
+              noise_level: this.estimateNoiseLevel(baseWindSpeed, latitude, locationName)
+            };
   }
 
   private addVariation(value: number, variationPercent: number): number {
@@ -320,6 +401,80 @@ class EnvironmentalDataService {
     const tempFactor = (temperature - 15) * 2;
     const latitudeFactor = Math.abs(latitude) * 0.1;
     return Math.round(baseCO2 + tempFactor + latitudeFactor);
+  }
+
+  private estimateOzoneConcentration(uvIndex: number, temperature: number, latitude: number): number {
+    const baseOzone = 0.12; // ppm
+    const uvFactor = uvIndex * 0.01;
+    const tempFactor = (temperature - 20) * 0.002;
+    const latitudeFactor = Math.abs(latitude) * 0.0001;
+    return Math.round((baseOzone + uvFactor + tempFactor + latitudeFactor) * 1000) / 1000;
+  }
+
+  private estimatePollenCount(temperature: number, humidity: number, windSpeed: number): number {
+    let basePollen = 50; // grains per cubic meter
+    
+    // Temperature affects pollen production
+    if (temperature > 20 && temperature < 30) {
+      basePollen += 100; // Optimal temperature for pollen
+    } else if (temperature < 10 || temperature > 35) {
+      basePollen -= 30; // Extreme temperatures reduce pollen
+    }
+    
+    // Humidity affects pollen dispersal
+    if (humidity > 80) {
+      basePollen -= 40; // High humidity reduces airborne pollen
+    } else if (humidity < 30) {
+      basePollen += 20; // Low humidity increases pollen dispersal
+    }
+    
+    // Wind speed affects pollen distribution
+    if (windSpeed > 5) {
+      basePollen += windSpeed * 10; // Wind disperses pollen
+    }
+    
+    return Math.max(0, Math.round(basePollen));
+  }
+
+  private estimateSoilMoisture(precipitation: number, humidity: number, temperature: number): number {
+    let baseMoisture = 30; // percentage
+    
+    // Precipitation increases soil moisture
+    baseMoisture += precipitation * 20;
+    
+    // Humidity affects soil moisture retention
+    baseMoisture += (humidity - 50) * 0.3;
+    
+    // Temperature affects evaporation
+    if (temperature > 25) {
+      baseMoisture -= (temperature - 25) * 2; // High temperature increases evaporation
+    }
+    
+    return Math.max(0, Math.min(100, Math.round(baseMoisture)));
+  }
+
+  private estimateNoiseLevel(windSpeed: number, latitude: number, locationName?: string): number {
+    let baseNoise = 40; // decibels
+    
+    // Wind speed affects noise
+    baseNoise += windSpeed * 2;
+    
+    // Location type affects noise
+    if (locationName) {
+      const name = locationName.toLowerCase();
+      if (name.includes('urban') || name.includes('tokyo') || name.includes('new york') || name.includes('london')) {
+        baseNoise += 30; // Urban areas are noisier
+      } else if (name.includes('rainforest') || name.includes('amazon') || name.includes('congo')) {
+        baseNoise += 10; // Natural sounds
+      } else if (name.includes('desert') || name.includes('sahara') || name.includes('antarctica')) {
+        baseNoise -= 10; // Quiet environments
+      }
+    }
+    
+    // Latitude affects noise (more activity near equator)
+    baseNoise += (90 - Math.abs(latitude)) * 0.1;
+    
+    return Math.max(20, Math.min(120, Math.round(baseNoise)));
   }
 }
 

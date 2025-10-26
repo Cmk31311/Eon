@@ -1,0 +1,31 @@
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backend Python files (not needed for Vercel)
+backend/
+*.py
+__pycache__/
+*.pyc
+requirements.txt
+
+# Documentation
+*.md
+!README.md
+
+# Development tools
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# Node modules (will be installed by Vercel)
+node_modules/
+frontend/node_modules/
+
+# Build artifacts
+dist/
+build/

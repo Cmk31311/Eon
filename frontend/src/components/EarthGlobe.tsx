@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 
 interface Region {
   name: string;
@@ -14,7 +14,7 @@ interface EarthGlobeProps {
   regions: Region[];
 }
 
-export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: EarthGlobeProps) {
+const EarthGlobe = memo(function EarthGlobe({ selectedRegion, onRegionClick, regions }: EarthGlobeProps) {
   const globeEl = useRef<any>(null);
   const [Globe, setGlobe] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -142,4 +142,6 @@ export default function EarthGlobe({ selectedRegion, onRegionClick, regions }: E
       />
     </div>
   );
-}
+});
+
+export default EarthGlobe;
