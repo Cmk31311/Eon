@@ -1,31 +1,18 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "devCommand": "cd frontend && npm run dev",
+  "installCommand": "cd frontend && npm install",
+  "framework": "vite",
+  "rewrites": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "source": "/api/tts",
+      "destination": "/server/index.js"
     },
     {
-      "src": "server/index.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/tts",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
-    }
-  ],
-  "functions": {
-    "server/index.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
