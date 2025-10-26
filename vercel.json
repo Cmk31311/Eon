@@ -15,7 +15,7 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/tts",
       "dest": "/server/index.js"
     },
     {
@@ -27,8 +27,5 @@
     "server/index.js": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NODE_ENV": "production"
   }
 }
