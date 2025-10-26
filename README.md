@@ -1,33 +1,35 @@
 # 🌍 EON - Earth Saga
 
-> **Interactive Environmental Data Visualization & AI-Powered Storytelling**
+> **Interactive Environmental Data Visualization & Claude AI-Powered Storytelling**
 
-An immersive web application that transforms real-time environmental data from 222+ global regions into dynamic, AI-generated narratives with text-to-speech capabilities.
+An immersive web application that transforms real-time environmental data from 222+ global regions into dynamic, Claude AI-generated narratives with multi-voice text-to-speech capabilities.
 
 ![EON Earth Saga](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![React](https://img.shields.io/badge/React-18.3.1-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.4-blue)
+![Claude AI](https://img.shields.io/badge/AI-Claude%20Sonnet%204.5-purple)
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-black)
 
 ## ✨ Features
 
 ### 🌐 Interactive 3D Globe
-- **222+ Unique Regions** across 8 categories (Rainforest, Desert, Mountain, Coastal, Urban, Wetland, Volcanic, Tundra)
+- **222+ Unique Regions** across multiple categories (Rainforest, Desert, Mountain, Coastal, Polar, Island, Plains)
 - **Real-time Environmental Data** from Open-Meteo and OpenWeatherMap APIs
 - **Smooth 3D Interactions** with Three.js and React Globe GL
 - **Responsive Design** optimized for all devices
 
-### 🤖 AI-Powered Narratives
-- **Dynamic Story Generation** using enhanced local AI algorithms
-- **Data-Driven Content** based on real environmental parameters
-- **Unique Narratives** that change on every refresh
+### 🤖 Claude AI-Powered Narratives
+- **Dynamic Story Generation** using Claude Sonnet 4.5 API
+- **Data-Driven Content** analyzing all environmental parameters
+- **Unique Narratives** that change with each generation
 - **Regional Context** with location-specific storytelling
+- **Health Analysis** with implications and recommendations
 
-### 🔊 Text-to-Speech
+### 🔊 Multi-Voice Text-to-Speech
 - **Custom Voice Integration** with Fish Audio TTS
-- **Personalized Narration** using your custom "Cmk" voice
+- **Multiple Voices** - rotates through available voices on each click
 - **Real-time Audio Generation** with stop/play controls
-- **Fallback Support** with browser speech synthesis
+- **High-Quality Audio** with professional voice synthesis
 
 ### 🎨 Advanced UI/UX
 - **Glassmorphism Design** with modern aesthetics
@@ -39,51 +41,52 @@ An immersive web application that transforms real-time environmental data from 2
 - **Region Search** with instant filtering
 - **Bookmark System** for favorite locations
 - **Data Export** (CSV/JSON formats)
-- **Environmental Parameters**: Temperature, Humidity, Pressure, Wind, Precipitation, UV Index, Visibility from Space, Cloud Cover, Solar Radiation, Air Quality, CO2, Ozone, Pollen, Soil Moisture, Noise Level
+- **15+ Environmental Parameters**: Temperature, Humidity, Pressure, Wind, Precipitation, UV Index, Visibility, Cloud Cover, Solar Radiation, Air Quality, CO2, Ozone, Pollen, Soil Moisture, Noise Level
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
+- Anthropic Claude API key
 - Fish Audio API key (for TTS)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/eon-earth-saga.git
-cd eon-earth-saga
+git clone https://github.com/Cmk31311/Eon.git
+cd earthstory
 
 # Install dependencies
-npm install
 cd frontend && npm install
+cd ../server && npm install
+```
 
-# Set up environment variables
-cp .env.example .env
-# Add your Fish Audio API key to .env
+### Environment Setup
+
+Create a `.env` file in the root directory:
+
+```env
+# Anthropic Claude API
+VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Fish Audio TTS
+FISH_API_KEY=your_fish_audio_api_key
+FISH_VOICE_ID=your_voice_id
+FISH_TTS_ENDPOINT=https://api.fish.audio/v1/tts
 ```
 
 ### Development
 
 ```bash
-# Start the frontend development server
+# Start the frontend development server (from frontend/)
 npm run dev
 
-# Start the TTS server (optional)
-npm run server
+# Start the TTS server (from server/) in another terminal
+node index.js
 
 # Open http://localhost:5173
-```
-
-### Production Build
-
-```bash
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
 ## 🌐 Deployment
@@ -103,15 +106,11 @@ npm run preview
 
 3. **Add Environment Variables** in Vercel Dashboard:
    ```
+   VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
    FISH_API_KEY=your_fish_audio_api_key
-   FISH_VOICE_ID=@https://fish.audio/m/your_voice_id
+   FISH_VOICE_ID=your_voice_id
    FISH_TTS_ENDPOINT=https://api.fish.audio/v1/tts
    ```
-
-### Other Platforms
-- **Netlify**: Works with static build
-- **GitHub Pages**: Static deployment
-- **Railway/Render**: Full-stack deployment
 
 ## 🏗️ Architecture
 
@@ -121,34 +120,35 @@ npm run preview
 - **Tailwind CSS** for styling
 - **Three.js** for 3D graphics
 - **React Globe GL** for globe visualization
+- **Anthropic SDK** for Claude AI integration
 
 ### Backend Services
 - **Express.js** serverless functions (Vercel)
-- **Fish Audio TTS** integration
+- **Fish Audio TTS** integration for voice synthesis
 - **Open-Meteo API** for weather data
 - **OpenWeatherMap** for air quality data
 
 ### Data Flow
 ```
-User Interaction → Region Selection → API Data Fetch → AI Narrative Generation → TTS Audio → User Experience
+User Interaction → Region Selection → API Data Fetch → Claude AI Analysis → Narrative Generation → Multi-Voice TTS → User Experience
 ```
 
 ## 📊 Environmental Data Sources
 
-- **Weather Data**: Open-Meteo API (temperature, humidity, pressure, wind, precipitation, UV, visibility, clouds)
+- **Weather Data**: Open-Meteo API (temperature, humidity, pressure, wind, precipitation, UV, visibility, clouds, solar radiation)
 - **Air Quality**: OpenWeatherMap Air Pollution API (AQI, CO2, ozone, pollen)
-- **Additional Parameters**: Calculated soil moisture, noise levels, solar radiation
+- **Calculated Parameters**: Soil moisture, noise levels
 
-## 🎯 Hackathon Demo Script
+## 🎯 Key Features Showcase
 
-### 30-Second Pitch
-"EON Earth Saga transforms environmental data into immersive stories. Click any of 222 global regions to see real-time data become AI-generated narratives with your custom voice."
+### 30-Second Demo
+"EON Earth Saga transforms environmental data into immersive stories. Click any of 222 global regions to see real-time data analyzed by Claude AI, generating unique narratives that you can hear in multiple voices."
 
 ### Key Demo Points
 1. **Interactive Globe**: "Explore 222 unique regions worldwide"
 2. **Real-time Data**: "Live environmental parameters from space"
-3. **AI Narratives**: "Powered by enhanced local AI algorithms"
-4. **Custom TTS**: "Hear stories in your own voice"
+3. **Claude AI Analysis**: "Powered by Claude Sonnet 4.5"
+4. **Multi-Voice TTS**: "Hear stories in different voices"
 5. **Advanced Features**: "Search, bookmark, export data"
 
 ## 🔧 Configuration
@@ -156,18 +156,19 @@ User Interaction → Region Selection → API Data Fetch → AI Narrative Genera
 ### Environment Variables
 
 ```env
+# Anthropic Claude API (Required for AI narratives)
+VITE_ANTHROPIC_API_KEY=your_api_key_here
+
 # Fish Audio TTS (Required for voice features)
 FISH_API_KEY=your_api_key_here
-FISH_VOICE_ID=@https://fish.audio/m/your_voice_id
+FISH_VOICE_ID=your_voice_id
 FISH_TTS_ENDPOINT=https://api.fish.audio/v1/tts
-
-# Note: AI narratives use enhanced local generation - no external backend needed
 ```
 
 ### Customization
 
 - **Add Regions**: Edit `frontend/src/App.tsx` regions array
-- **Modify Narratives**: Update `frontend/src/services/narrativeService.ts`
+- **Modify Claude Prompts**: Update `frontend/src/services/claudeService.ts`
 - **Change Styling**: Modify `frontend/src/index.css` and Tailwind config
 - **Update APIs**: Configure in `frontend/src/services/environmentalDataService.ts`
 
@@ -177,34 +178,40 @@ FISH_TTS_ENDPOINT=https://api.fish.audio/v1/tts
 - **Loading**: Lazy loading for components
 - **Caching**: Memoized calculations and API responses
 - **Rendering**: React.memo for performance optimization
-- **Assets**: Compressed images and optimized 3D models
+- **API Calls**: Efficient Claude API usage with fallback
 
 ## 🛠️ Development
 
 ### Project Structure
 ```
-eon-earth-saga/
+earthstory/
 ├── frontend/                 # React frontend
 │   ├── src/
 │   │   ├── components/       # React components
+│   │   │   ├── EarthGlobe.tsx
+│   │   │   ├── NarrativePanel.tsx
+│   │   │   └── ThemeToggle.tsx
 │   │   ├── services/         # API services
+│   │   │   ├── claudeService.ts      # Claude AI integration
+│   │   │   ├── narrativeService.ts   # Narrative orchestration
+│   │   │   └── environmentalDataService.ts
 │   │   ├── lib/             # Utilities
+│   │   │   └── ttsClient.ts # Text-to-speech
 │   │   └── utils/           # Helper functions
 │   └── dist/                # Build output
 ├── server/                  # Express serverless functions
-# No backend directory needed - simplified architecture
+│   └── index.js            # TTS proxy server
 ├── vercel.json             # Vercel configuration
 └── package.json            # Root package config
 ```
 
 ### Key Components
-- **`App.tsx`**: Main application with 222 regions
+- **`App.tsx`**: Main application with 222 regions and data visualization
 - **`EarthGlobe.tsx`**: 3D globe visualization
-- **`NarrativePanel.tsx`**: AI narrative display
-- **`ThemeToggle.tsx`**: Dark/light mode
+- **`NarrativePanel.tsx`**: Claude AI narrative display with TTS
+- **`claudeService.ts`**: Claude AI API integration
 - **`environmentalDataService.ts`**: Data fetching
-- **`narrativeService.ts`**: AI narrative generation
-- **`ttsClient.ts`**: Text-to-speech integration
+- **`ttsClient.ts`**: Multi-voice text-to-speech
 
 ## 🤝 Contributing
 
@@ -220,7 +227,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Enhanced Local AI** for narrative generation
+- **Anthropic Claude AI** for intelligent narrative generation
 - **Fish Audio** for text-to-speech capabilities
 - **Open-Meteo** for weather data
 - **OpenWeatherMap** for air quality data
@@ -229,12 +236,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/eon-earth-saga/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/eon-earth-saga/discussions)
-- **Email**: your.email@example.com
+- **Repository**: [GitHub](https://github.com/Cmk31311/Eon)
+- **Issues**: [GitHub Issues](https://github.com/Cmk31311/Eon/issues)
 
 ---
 
 **Built with ❤️ for environmental awareness and storytelling**
 
-*Transform data into stories. Explore the world through AI-powered narratives.*
+*Transform data into stories. Explore the world through Claude AI-powered narratives.*
