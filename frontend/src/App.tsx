@@ -994,7 +994,7 @@ function App() {
                     <span className="ml-3 text-gray-400">Loading narrative...</span>
                 </div>
                 }>
-                  <NarrativePanel narrative={narrative.narrative} />
+                  <NarrativePanel narrative={narrative.narrative} environmentalData={features} />
                 </Suspense>
                 
                 {/* Decorative elements */}

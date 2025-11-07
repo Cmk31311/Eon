@@ -57,6 +57,103 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
+// Music generation endpoint using Replicate API
+app.post('/api/generate-music', async (req, res) => {
+  try {
+    const { prompt, duration = 8 } = req.body || {};
+    if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
+
+    // Check for Replicate API key
+    if (!process.env.REPLICATE_API_TOKEN) {
+      // Fallback: Return a sample/mock response for development
+      console.warn('REPLICATE_API_TOKEN not set, returning mock response');
+      return res.json({
+        audioUrl: null,
+        mock: true,
+        message: 'Music generation requires REPLICATE_API_TOKEN. Set it in your .env file.',
+        prompt: prompt
+      });
+    }
+
+    // Call Replicate API for MusicGen
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        version: 'stereo-melody-large', // MusicGen model version
+        input: {
+          prompt: prompt,
+          duration: Math.min(duration, 30), // Cap at 30 seconds for performance
+          model_version: 'stereo-melody-large',
+          output_format: 'mp3',
+          normalization_strategy: 'peak'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      console.error('Replicate API error:', errorText);
+      return res.status(response.status).json({
+        error: 'Music generation failed',
+        detail: errorText
+      });
+    }
+
+    const prediction = await response.json();
+
+    // Replicate uses async processing, poll for result
+    let result = prediction;
+    let attempts = 0;
+    const maxAttempts = 60; // 60 attempts with 2s interval = 2 minutes max
+
+    while (result.status !== 'succeeded' && result.status !== 'failed' && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+
+      const statusResponse = await fetch(
+        `https://api.replicate.com/v1/predictions/${result.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`
+          }
+        }
+      );
+
+      if (!statusResponse.ok) break;
+      result = await statusResponse.json();
+      attempts++;
+    }
+
+    if (result.status === 'succeeded' && result.output) {
+      return res.json({
+        audioUrl: result.output,
+        prompt: prompt,
+        duration: duration
+      });
+    } else if (result.status === 'failed') {
+      return res.status(500).json({
+        error: 'Music generation failed',
+        detail: result.error
+      });
+    } else {
+      return res.status(408).json({
+        error: 'Music generation timeout',
+        detail: 'Generation took too long, please try again'
+      });
+    }
+
+  } catch (err) {
+    console.error('Music generation error:', err);
+    res.status(500).json({
+      error: 'Music generation failed',
+      detail: String(err)
+    });
+  }
+});
+
 // Export for Vercel
 export default app;
 
